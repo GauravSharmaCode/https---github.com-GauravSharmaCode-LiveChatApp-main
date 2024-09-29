@@ -1,12 +1,19 @@
 {
-  "name": "taptrix-master",
+  "name": "live-chat-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Live chat application with React frontend and Node.js backend",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cd server && npm start",
+    "client": "cd client && npm start",
+    "build": "cd client && npm install && npm run build",
+    "heroku-postbuild": "npm run build",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Gaurav Sharma",
+  "license": "ISC",
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
