@@ -4,7 +4,7 @@
   "description": "Live chat application with React frontend and Node.js backend",
   "main": "server/index.js",
   "scripts": {
-    "start": "cd server && npm start",
+    "start": "cd server && npm install && npm start",
     "client": "cd client && npm start",
     "build": "cd client && npm install && npm run build",
     "heroku-postbuild": "npm run build",
