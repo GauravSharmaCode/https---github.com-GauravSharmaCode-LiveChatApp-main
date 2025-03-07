@@ -3,14 +3,29 @@ const {
   loginController,
   registerController,
   fetchAllUsersController,
-} = require("../Controllers/userController");
+} = require("../controllers/userController");
 
 const { protect } = require("../middleware/authMiddleware");
 
-const Router = express.Router();
+const router = express.Router();
 
-Router.post("/login", loginController);
-Router.post("/register", registerController);
-Router.get("/fetchUsers", protect, fetchAllUsersController);
+// Auth routes
+router
+  .route("/login")
+  .post(loginController) // ✅ Handles POST requests
+  .all((req, res) => {
+    // ❌ Rejects GET and other methods
+    res.status(405).json({ message: "Method Not Allowed" });
+  });
 
-module.exports = Router;
+router
+  .route("/register")
+  .post(registerController) // ✅ Handles POST requests
+  .all((req, res) => {
+    // ❌ Rejects GET and other methods
+    res.status(405).json({ message: "Method Not Allowed" });
+  });
+
+// User routes
+router.get("/", protect, fetchAllUsersController);
+module.exports = router;

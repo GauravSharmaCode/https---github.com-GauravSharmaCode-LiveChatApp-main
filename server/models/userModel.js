@@ -21,13 +21,18 @@ const userModel = mongoose.Schema(
   }
 );
 
+/**
+ * Matches the entered password with the hashed password in the db
+ * @param {string} enteredPassword The password entered by the user
+ * @returns {boolean} Whether the entered password matches the hashed password
+ */
 userModel.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 userModel.pre("save", async function (next) {
-  if (!this.isModified) {
-    next();
+  if (!this.isModified("password")) {
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);

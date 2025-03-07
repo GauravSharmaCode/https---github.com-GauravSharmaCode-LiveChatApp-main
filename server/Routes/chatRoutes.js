@@ -5,15 +5,15 @@ const {
   createGroupChat,
   groupExit,
   fetchGroups,
-} = require("../Controllers/chatControllers");
+} = require("../controllers/chatControllers"); // Fix naming to match correct file
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.route("/").post(protect, accessChat);
-router.route("/").get(protect, fetchChats);
-router.route("/createGroup").post(protect, createGroupChat);
-router.route("/fetchGroups").get(protect, fetchGroups);
-router.route("/groupExit").put(protect, groupExit);
+router.post("/", protect, accessChat);
+router.get("/", protect, fetchChats);
+router.post("/createGroup", protect, createGroupChat);
+router.get("/fetchGroups", protect, fetchGroups);
+router.put("/groupExit", protect, groupExit);
 
 module.exports = router;

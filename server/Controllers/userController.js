@@ -1,85 +1,59 @@
-const generateToken = require("../Config/generateToken");
-const UserModel = require("../models/userModel");
 const expressAsyncHandler = require("express-async-handler");
-// Login
+const userService = require("../Services/userService");
+const { UserServiceError } = require("../Services/userService");
+
+// ✅ Login Controller
 const loginController = expressAsyncHandler(async (req, res) => {
-  console.log(req.body);
-  const { name, password } = req.body;
+  try {
+    const { name, password } = req.body;
+    if (!name || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-  const user = await UserModel.findOne({ name });
-
-  console.log("fetched user Data", user);
-  console.log(await user.matchPassword(password));
-  if (user && (await user.matchPassword(password))) {
-    const response = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    };
-    console.log(response);
-    res.json(response);
-  } else {
-    res.status(401);
-    throw new Error("Invalid UserName or Password");
+    const userData = await userService.loginUser(name, password);
+    res.status(200).json(userData);
+  } catch (error) {
+    if (error instanceof UserServiceError) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error(`[LOGIN] Error: ${error.message}`);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 });
 
-// Registration
+// ✅ Register Controller
 const registerController = expressAsyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-  // check for all fields
-  if (!name || !email || !password) {
-    res.send(400);
-    throw Error("All necessary input fields have not been filled");
-  }
-
-  // pre-existing user
-  const userExist = await UserModel.findOne({ email });
-  if (userExist) {
-    // res.send(405);
-    throw new Error("User already Exists");
-  }
-
-  // userName already Taken
-  const userNameExist = await UserModel.findOne({ name });
-  if (userNameExist) {
-    // res.send(406);
-    throw new Error("UserName already taken");
-  }
-
-  // create an entry in the db
-  const user = await UserModel.create({ name, email, password });
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Registration Error");
+    const newUser = await userService.registerUser(name, email, password);
+    res.status(201).json(newUser);
+  } catch (error) {
+    if (error instanceof UserServiceError) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error(`[REGISTER] Error: ${error.message}`);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 });
 
+// ✅ Fetch Users Controller
 const fetchAllUsersController = expressAsyncHandler(async (req, res) => {
-  const keyword = req.query.search
-    ? {
-        $or: [
-          { name: { $regex: req.query.search, $options: "i" } },
-          { email: { $regex: req.query.search, $options: "i" } },
-        ],
-      }
-    : {};
-
-  const users = await UserModel.find(keyword).find({
-    _id: { $ne: req.user._id },
-  });
-  res.send(users);
+  try {
+    const users = await userService.fetchAllUsers(
+      req.query.search,
+      req.user._id
+    );
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(`[FETCH_USERS] Error: ${error.message}`);
+    res.status(500).json({ message: "Error fetching users" });
+  }
 });
 
 module.exports = {
